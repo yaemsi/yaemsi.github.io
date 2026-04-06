@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YEM Photography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@300;400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#070707;--text:#ede8df;--gold:#c9a96e;--dim:rgba(237,232,223,.35);--border:rgba(237,232,223,.08);--red:#d63b2b}
+html,body{width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;cursor:none}
+#cur{position:fixed;width:12px;height:12px;border-radius:50%;background:var(--gold);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .3s,height .3s,background .3s;mix-blend-mode:difference}
+#cur.drag-mode{width:60px;height:60px;background:rgba(201,169,110,.15);border:1px solid var(--gold)}
+#cur-label{position:fixed;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);pointer-events:none;z-index:9999;transform:translate(-50%,-50%) translateY(38px);opacity:0;transition:opacity .3s;font-family:'DM Mono',monospace}
+#cur.drag-mode~#cur-label{opacity:1}
+body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") repeat;opacity:.025;pointer-events:none;z-index:9998;background-size:200px}
+
+/* LANG SWITCHER */
+.lang-switcher{display:flex;align-items:center;gap:.4rem;background:rgba(237,232,223,.06);border:1px solid rgba(237,232,223,.12);padding:.3rem .5rem;border-radius:2px}
+.lang-btn{background:none;border:none;cursor:pointer;font-size:1rem;opacity:.35;transition:opacity .2s,transform .2s;line-height:1;padding:.1rem}
+.lang-btn:hover{opacity:.7}
+.lang-btn.active{opacity:1;transform:scale(1.15)}
+.lang-sep{font-size:.6rem;color:rgba(237,232,223,.2)}
+#lang-overlay{position:fixed;inset:0;background:var(--bg);z-index:800;pointer-events:none;opacity:0;transition:opacity .25s}
+#lang-overlay.flash{opacity:1}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:600;padding:1.75rem 3rem;display:flex;justify-content:space-between;align-items:center}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;letter-spacing:.3em;color:var(--text);text-decoration:none}
+.nav-logo span{color:var(--gold)}
+.nav-r{display:flex;gap:2rem;align-items:center}
+.nav-r a{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);text-decoration:none;transition:color .2s}
+.nav-r a:hover{color:var(--text)}
+
+/* INTRO */
+#intro{position:fixed;inset:0;background:var(--bg);z-index:700;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s,visibility .8s}
+#intro.out{opacity:0;visibility:hidden}
+.intro-line{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,6vw,5rem);font-weight:300;letter-spacing:.05em;color:var(--text);overflow:hidden;line-height:1.1}
+.intro-word{display:inline-block;transform:translateY(100%);animation:introUp .9s cubic-bezier(.16,1,.3,1) forwards}
+.intro-sub{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-top:1.5rem;opacity:0;animation:fadeI .6s 1s ease forwards}
+.intro-bar{width:0;height:1px;background:var(--gold);margin-top:2.5rem;animation:barW 1.5s .5s ease forwards}
+@keyframes introUp{to{transform:translateY(0)}}
+@keyframes fadeI{to{opacity:1}}
+@keyframes barW{to{width:120px}}
+
+#hero{height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:0 3rem 4rem;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.hero-bg-word{position:absolute;bottom:-.15em;left:-.03em;font-family:'Cormorant Garamond',serif;font-size:clamp(12rem,28vw,26rem);font-weight:300;color:rgba(237,232,223,.025);line-height:1;pointer-events:none;user-select:none}
+.hero-content{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:2rem}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,9vw,8rem);font-weight:300;line-height:.92;letter-spacing:-.01em}
+.hero-title em{font-style:italic;color:rgba(237,232,223,.3)}
+.hero-right{text-align:right;max-width:32ch}
+.hero-desc{font-size:.85rem;line-height:1.85;color:var(--dim);margin-bottom:1.5rem;font-weight:300}
+.hero-cta{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,169,110,.3);padding-bottom:2px;transition:border-color .2s}
+.hero-cta:hover{border-color:var(--gold)}
+
+#gallery-section{position:relative}
+#gallery-trigger{height:600vh}
+#gallery-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg)}
+.filmstrip{display:flex;align-items:center;gap:16px;will-change:transform;user-select:none}
+.film-item{position:relative;flex-shrink:0;overflow:hidden;cursor:grab;transition:flex .6s cubic-bezier(.16,1,.3,1)}
+.film-item.active{flex:0 0 55vw}
+.film-item.side{flex:0 0 22vw}
+.film-item.far{flex:0 0 14vw}
+.film-placeholder{width:100%;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);border:1px solid var(--border);display:flex;align-items:flex-end;padding:1.25rem;position:relative;overflow:hidden;transition:height .6s cubic-bezier(.16,1,.3,1)}
+.film-item.active .film-placeholder{height:70vh}
+.film-item.side .film-placeholder{height:50vh}
+.film-item.far .film-placeholder{height:35vh}
+.film-placeholder::before{content:attr(data-label);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.06)}
+.film-placeholder::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.7));pointer-events:none}
+.film-info{position:absolute;bottom:0;left:0;right:0;padding:1.25rem;z-index:1;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1)}
+.film-item.active .film-info{transform:translateY(0)}
+.film-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;margin-bottom:.25rem}
+.film-meta{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.film-num{position:absolute;top:1rem;right:1rem;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;color:rgba(255,255,255,.2);z-index:2}
+.gallery-hud{position:absolute;bottom:2.5rem;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 3rem;z-index:10;pointer-events:none}
+.hud-dots{display:flex;gap:6px;align-items:center}
+.hud-dot{width:20px;height:1px;background:rgba(237,232,223,.2);transition:background .3s,width .3s}
+.hud-dot.active{background:var(--gold);width:40px}
+.hud-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.hud-count{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:rgba(237,232,223,.2)}
+.hud-count span{color:var(--text)}
+.scroll-hint{position:absolute;top:50%;right:3rem;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:.75rem;pointer-events:none}
+.scroll-arrow{width:1px;height:40px;background:rgba(237,232,223,.15);position:relative;overflow:hidden}
+.scroll-arrow::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:var(--gold);animation:scrollPulse 1.5s infinite}
+@keyframes scrollPulse{to{top:200%}}
+.scroll-text{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);writing-mode:vertical-rl}
+#drag-zone{position:absolute;inset:0;z-index:5}
+.genre-switcher{position:absolute;top:7rem;left:3rem;display:flex;flex-direction:column;gap:.5rem;z-index:10}
+.genre-btn{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(237,232,223,.25);background:none;border:none;cursor:pointer;text-align:left;padding:.3rem 0 .3rem 1.25rem;transition:color .2s;position:relative}
+.genre-btn::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:8px;height:1px;background:currentColor;transition:width .2s}
+.genre-btn.active{color:var(--gold)}
+.genre-btn.active::before{width:16px}
+.genre-btn:hover{color:var(--text)}
+
+#about{background:var(--bg);border-top:1px solid var(--border)}
+.about-wrap{display:grid;grid-template-columns:1fr 1fr;min-height:80vh}
+.about-l{padding:5rem 3rem;border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between}
+.about-eyebrow{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:2rem}
+.about-heading{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.5rem);font-weight:300;line-height:1.15;margin-bottom:2rem}
+.about-heading em{font-style:italic;color:rgba(237,232,223,.3)}
+.about-text{font-size:.875rem;line-height:1.9;color:var(--dim);font-weight:300;margin-bottom:1rem}
+.gear-list{margin-top:2.5rem}
+.gear-item{display:flex;justify-content:space-between;padding:.9rem 0;border-bottom:1px solid var(--border);font-size:.8rem}
+.gear-item:first-child{border-top:1px solid var(--border)}
+.gear-k{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.gear-v{color:var(--text)}
+.about-r{padding:5rem 3rem;display:grid;grid-template-rows:1fr 1fr;gap:1px;background:var(--border)}
+.svc-card{background:var(--bg);padding:2.5rem;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;transition:background .3s}
+.svc-card:hover{background:#0e0e0e}
+.svc-num{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;color:var(--gold);margin-bottom:1rem}
+.svc-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:300;margin-bottom:.75rem}
+.svc-desc{font-size:.8rem;line-height:1.75;color:var(--dim);font-weight:300}
+.svc-link{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);text-decoration:none;margin-top:1.25rem;display:inline-block;border-bottom:1px solid rgba(201,169,110,.3);padding-bottom:2px;transition:border-color .2s}
+.svc-link:hover{border-color:var(--gold)}
+
+#booking{border-top:1px solid var(--border)}
+.booking-grid{display:grid;grid-template-columns:1fr 1fr}
+.booking-l{padding:5rem 3rem;background:var(--text);color:var(--bg)}
+.booking-heading{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;line-height:1.1;margin-bottom:1.5rem}
+.booking-heading em{font-style:italic;color:rgba(8,8,8,.3)}
+.booking-sub{font-size:.875rem;line-height:1.8;color:rgba(8,8,8,.55);margin-bottom:3rem}
+.option-row{display:flex;justify-content:space-between;align-items:center;padding:1.25rem 0;border-bottom:1px solid rgba(8,8,8,.1);cursor:pointer;transition:padding-left .25s}
+.option-row:first-of-type{border-top:1px solid rgba(8,8,8,.1)}
+.option-row:hover{padding-left:.75rem}
+.option-row:hover .opt-arrow{transform:translate(3px,-3px);color:var(--red)}
+.opt-name{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--bg)}
+.opt-sub{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;color:rgba(8,8,8,.4)}
+.opt-arrow{transition:transform .2s,color .2s;color:rgba(8,8,8,.3)}
+.booking-r{padding:5rem 3rem;background:var(--bg)}
+.form-tag{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:2.5rem}
+.form-body{display:flex;flex-direction:column;gap:1.5rem}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.f-field label{display:block;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(237,232,223,.3);margin-bottom:.6rem}
+.f-field input,.f-field select,.f-field textarea{width:100%;background:rgba(237,232,223,.04);border:none;border-bottom:1px solid rgba(237,232,223,.1);padding:.875rem 0;color:var(--text);font-family:'Syne',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;-webkit-appearance:none;resize:none}
+.f-field input:focus,.f-field select:focus,.f-field textarea:focus{border-color:var(--gold)}
+.f-field select option{background:#111}
+.f-field textarea{min-height:80px}
+.btn-gold{width:100%;padding:1rem;background:var(--gold);border:none;color:var(--bg);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:.5rem}
+.btn-gold:hover{opacity:.85}
+.ai-assist{margin-top:2rem;border-top:1px solid var(--border);padding-top:2rem}
+.ai-assist-label{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:.75rem}
+.ai-assist-label::before{content:'AI';font-size:.5rem;padding:.2rem .4rem;border:1px solid var(--gold);color:var(--gold)}
+.ai-msgs{max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ai-msg{padding:.75rem 1rem;font-size:.8rem;line-height:1.65;font-weight:300}
+.ai-msg.user{background:rgba(201,169,110,.1);border-left:2px solid var(--gold);color:var(--text)}
+.ai-msg.ai-r{background:rgba(237,232,223,.04);border-left:2px solid rgba(237,232,223,.1);color:var(--dim)}
+.ai-msg.typing{background:rgba(237,232,223,.04);border-left:2px solid rgba(237,232,223,.1);padding:.75rem 1rem}
+.typing-dot{display:inline-block;width:5px;height:5px;background:var(--dim);border-radius:50%;animation:td 1.2s infinite;margin:0 2px}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+.ai-input-row{display:flex;gap:.5rem}
+.ai-input{flex:1;background:rgba(237,232,223,.04);border:none;border-bottom:1px solid rgba(237,232,223,.1);padding:.6rem 0;color:var(--text);font-family:'Syne',sans-serif;font-size:.8rem;outline:none;transition:border-color .2s}
+.ai-input:focus{border-color:var(--gold)}
+.ai-input::placeholder{color:rgba(237,232,223,.2)}
+.ai-send{padding:.6rem 1rem;background:transparent;border:1px solid rgba(201,169,110,.3);color:var(--gold);font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.ai-send:hover{background:rgba(201,169,110,.1)}
+
+footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center}
+.footer-logo{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:300;letter-spacing:.25em;color:rgba(237,232,223,.2)}
+.footer-logo span{color:var(--gold)}
+.footer-copy{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;color:rgba(237,232,223,.2)}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+@media(max-width:900px){
+  nav{padding:1.25rem 1.5rem}.nav-r{gap:1.25rem}
+  #hero{padding:0 1.5rem 3rem}
+  .hero-content{flex-direction:column;align-items:flex-start;gap:2rem}
+  .hero-right{text-align:left}
+  .film-item.active{flex:0 0 85vw}.film-item.side{flex:0 0 40vw}.film-item.far{flex:0 0 25vw}
+  .about-wrap,.booking-grid{grid-template-columns:1fr}
+  .about-l{border-right:none;border-bottom:1px solid var(--border);padding:3rem 1.5rem}
+  .about-r,.booking-l,.booking-r{padding:3rem 1.5rem}
+  .f-row{grid-template-columns:1fr}
+  footer{padding:1.5rem;flex-direction:column;gap:.75rem;text-align:center}
+  .genre-switcher{display:none}
+  .gallery-hud{padding:0 1.5rem}
+}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="cur-label" data-i18n="drag">DRAG</div>
+<div id="lang-overlay"></div>
+
+<div id="intro">
+  <div class="intro-line">
+    <span class="intro-word" id="intro-w1" style="animation-delay:.1s">Light</span>
+    &nbsp;
+    <span class="intro-word" style="font-family:'Cormorant Garamond',serif;font-style:italic;animation-delay:.25s;color:rgba(237,232,223,.3)" id="intro-w2">through</span>
+    &nbsp;
+    <span class="intro-word" style="animation-delay:.4s" id="intro-w3">the</span>
+  </div>
+  <div class="intro-line">
+    <span class="intro-word" style="animation-delay:.55s;color:var(--gold)" id="intro-w4">lens.</span>
+  </div>
+  <div class="intro-sub" id="intro-sub">Yassir El Mesbahi · Photography</div>
+  <div class="intro-bar"></div>
+</div>
+
+<nav>
+  <a href="#" class="nav-logo">YEM <span>//</span></a>
+  <div class="nav-r">
+    <a href="#gallery-section" data-i18n="nav.gallery">Gallery</a>
+    <a href="#about" data-i18n="nav.about">About</a>
+    <a href="#booking" data-i18n="nav.book">Book</a>
+    <a href="index.html" data-i18n="nav.main">← Main site</a>
+    <div class="lang-switcher">
+      <button class="lang-btn active" id="btn-en" onclick="setLang('en')" title="English">🇬🇧</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn" id="btn-fr" onclick="setLang('fr')" title="Français">🇫🇷</button>
+    </div>
+  </div>
+</nav>
+
+<section id="hero">
+  <div class="hero-bg-word" data-i18n="hero.bgword">SIGHT</div>
+  <div class="hero-content">
+    <div>
+      <h1 class="hero-title" id="hero-title">
+        Through<br><em>the lens</em><br>of curiosity.
+      </h1>
+    </div>
+    <div class="hero-right">
+      <p class="hero-desc" data-i18n="hero.desc">From the medinas of Morocco to the streets of Europe — portraits, landscapes, street, documentary, and everything in between.</p>
+      <a href="#gallery-section" class="hero-cta" data-i18n="hero.cta">Explore the gallery ↓</a>
+    </div>
+  </div>
+</section>
+
+<section id="gallery-section">
+  <div id="gallery-trigger">
+    <div id="gallery-sticky">
+      <div class="genre-switcher" id="genre-sw"></div>
+      <div id="drag-zone"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+        <div class="filmstrip" id="filmstrip">
+          <div class="film-item far" data-genre="landscape"><div class="film-placeholder" style="height:35vh"><div class="film-num">08</div><div class="film-info"><div class="film-title" data-i18n="ph8.title">Saharan Edge</div><div class="film-meta" data-i18n="ph8.meta">Landscape · Merzouga 2023</div></div></div></div>
+          <div class="film-item side" data-genre="portrait"><div class="film-placeholder" style="height:50vh"><div class="film-num">07</div><div class="film-info"><div class="film-title" data-i18n="ph7.title">The Craftsman</div><div class="film-meta" data-i18n="ph7.meta">Portrait · Fès 2023</div></div></div></div>
+          <div class="film-item active" data-genre="portrait"><div class="film-placeholder" style="height:70vh"><div class="film-num">01</div><div class="film-info"><div class="film-title" data-i18n="ph1.title">Golden Hour Portrait</div><div class="film-meta" data-i18n="ph1.meta">Portrait · Tangier 2024</div></div></div></div>
+          <div class="film-item side" data-genre="landscape"><div class="film-placeholder" style="height:50vh"><div class="film-num">02</div><div class="film-info"><div class="film-title" data-i18n="ph2.title">Atlantic Dusk</div><div class="film-meta" data-i18n="ph2.meta">Landscape · Cap Spartel 2024</div></div></div></div>
+          <div class="film-item far" data-genre="street"><div class="film-placeholder" style="height:35vh"><div class="film-num">03</div><div class="film-info"><div class="film-title" data-i18n="ph3.title">Medina Shadows</div><div class="film-meta" data-i18n="ph3.meta">Street · Tétouan 2023</div></div></div></div>
+          <div class="film-item far" data-genre="documentary"><div class="film-placeholder" style="height:35vh"><div class="film-num">04</div><div class="film-info"><div class="film-title" data-i18n="ph4.title">Fishermen at 5am</div><div class="film-meta" data-i18n="ph4.meta">Documentary · Tangier 2024</div></div></div></div>
+          <div class="film-item far" data-genre="abstract"><div class="film-placeholder" style="height:35vh"><div class="film-num">05</div><div class="film-info"><div class="film-title" data-i18n="ph5.title">Tile Repetition</div><div class="film-meta" data-i18n="ph5.meta">Abstract · Marrakech 2022</div></div></div></div>
+          <div class="film-item far" data-genre="street"><div class="film-placeholder" style="height:35vh"><div class="film-num">06</div><div class="film-info"><div class="film-title" data-i18n="ph6.title">Rush Hour</div><div class="film-meta" data-i18n="ph6.meta">Street · Casablanca 2023</div></div></div></div>
+        </div>
+      </div>
+      <div class="gallery-hud">
+        <div class="hud-dots" id="hud-dots"></div>
+        <div class="hud-label" data-i18n="gallery.hint">Scroll or drag to explore</div>
+        <div class="hud-count"><span id="hud-cur">1</span> / <span id="hud-total">8</span></div>
+      </div>
+      <div class="scroll-hint">
+        <div class="scroll-arrow"></div>
+        <div class="scroll-text" data-i18n="gallery.scroll">Scroll</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="about-wrap">
+    <div class="about-l reveal">
+      <div>
+        <div class="about-eyebrow" data-i18n="about.eyebrow">About the photographer</div>
+        <h2 class="about-heading"><span data-i18n="about.h1">A researcher</span><br><span data-i18n="about.h2">with </span><em data-i18n="about.h3">an eye.</em></h2>
+        <p class="about-text" data-i18n="about.p1">I'm Yassir — by day an ML Research Engineer, by every other hour a photographer. The same obsession with patterns, light, and meaning that draws me to machine learning pulls me through the viewfinder.</p>
+        <p class="about-text" data-i18n="about.p2">My work spans Morocco and Europe, mixing long documentary projects with spontaneous street photography and commissioned portrait work. Every frame has a reason to exist.</p>
+      </div>
+      <div class="gear-list">
+        <div class="gear-item"><span class="gear-k" data-i18n="gear.body">Primary body</span><span class="gear-v">Sony A7 IV</span></div>
+        <div class="gear-item"><span class="gear-k" data-i18n="gear.lenses">Lenses</span><span class="gear-v">35mm f/1.4 · 85mm f/1.8 · 24-70mm</span></div>
+        <div class="gear-item"><span class="gear-k" data-i18n="gear.post">Post-processing</span><span class="gear-v">Lightroom · Capture One</span></div>
+        <div class="gear-item"><span class="gear-k" data-i18n="gear.based">Based in</span><span class="gear-v" data-i18n="gear.location">Tangier, Morocco</span></div>
+      </div>
+    </div>
+    <div class="about-r reveal">
+      <div class="svc-card"><div><div class="svc-num">01</div><div class="svc-name" data-i18n="svc1.name">Portrait Sessions</div><div class="svc-desc" data-i18n="svc1.desc">Individual, couple, or family portraits. Outdoor locations around Tangier or studio setups. 1–3 hours, fully edited delivery.</div></div><a href="#booking" class="svc-link" data-i18n="svc.book">Book a session →</a></div>
+      <div class="svc-card"><div><div class="svc-num">02</div><div class="svc-name" data-i18n="svc2.name">Editorial & Events</div><div class="svc-desc" data-i18n="svc2.desc">Conferences, cultural events, brand campaigns. Documentary-style coverage with an editorial eye.</div></div><a href="#booking" class="svc-link" data-i18n="svc.quote">Request a quote →</a></div>
+    </div>
+  </div>
+</section>
+
+<section id="booking">
+  <div class="booking-grid">
+    <div class="booking-l reveal">
+      <h2 class="booking-heading"><span data-i18n="booking.h1">Let's make</span><br><em data-i18n="booking.h2">something</em><br><span data-i18n="booking.h3">together.</span></h2>
+      <p class="booking-sub" data-i18n="booking.sub">Portrait sessions, events, editorial projects, or fine art prints — reach out and we'll make it happen.</p>
+      <div>
+        <div class="option-row"><div><div class="opt-name" data-i18n="opt1.name">Book a Session</div><div class="opt-sub" data-i18n="opt1.sub">Schedule time directly</div></div><span class="opt-arrow">→</span></div>
+        <div class="option-row"><div><div class="opt-name" data-i18n="opt2.name">Request a Quote</div><div class="opt-sub" data-i18n="opt2.sub">Custom project pricing</div></div><span class="opt-arrow">→</span></div>
+        <div class="option-row"><div><div class="opt-name" data-i18n="opt3.name">Fine Art Print</div><div class="opt-sub" data-i18n="opt3.sub">Limited edition prints</div></div><span class="opt-arrow">→</span></div>
+        <div class="option-row"><div><div class="opt-name" data-i18n="opt4.name">General Inquiry</div><div class="opt-sub" data-i18n="opt4.sub">Questions & collaborations</div></div><span class="opt-arrow">→</span></div>
+      </div>
+    </div>
+    <div class="booking-r reveal">
+      <div class="form-tag" data-i18n="form.tag">Booking Request</div>
+      <div class="form-body">
+        <div class="f-row">
+          <div class="f-field"><label data-i18n="form.fname">First name</label><input type="text" id="bf1"></div>
+          <div class="f-field"><label data-i18n="form.lname">Last name</label><input type="text" id="bf2"></div>
+        </div>
+        <div class="f-field"><label data-i18n="form.email">Email</label><input type="email" id="bf3"></div>
+        <div class="f-field">
+          <label data-i18n="form.service">Service</label>
+          <select id="bf-svc">
+            <option value="" data-i18n="form.selectopt">Select...</option>
+            <option data-i18n="svc1.name">Portrait Session</option>
+            <option data-i18n="svc2.name">Editorial & Events</option>
+            <option data-i18n="opt2.name">Request a Quote</option>
+            <option data-i18n="opt3.name">Fine Art Print</option>
+          </select>
+        </div>
+        <div class="f-row">
+          <div class="f-field"><label data-i18n="form.date">Date</label><input type="date" id="bf4"></div>
+          <div class="f-field">
+            <label data-i18n="form.budget">Budget</label>
+            <select id="bf5">
+              <option value="" data-i18n="form.selectopt">Select...</option>
+              <option data-i18n="bud1">&lt; 500 MAD</option>
+              <option data-i18n="bud2">500–2,000 MAD</option>
+              <option data-i18n="bud3">2,000–5,000 MAD</option>
+              <option data-i18n="bud4">5,000+ MAD</option>
+              <option data-i18n="bud5">Let's discuss</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-field"><label data-i18n="form.details">Project details</label><textarea rows="3" id="bf6"></textarea></div>
+        <button class="btn-gold" data-i18n="form.send">Send Request →</button>
+      </div>
+      <div class="ai-assist">
+        <div class="ai-assist-label" data-i18n="ai.label">AI Booking Assistant</div>
+        <div class="ai-msgs" id="ai-msgs"></div>
+        <div class="ai-input-row">
+          <input class="ai-input" id="ai-input" onkeydown="if(event.key==='Enter')sendAI()">
+          <button class="ai-send" id="ai-send-btn" onclick="sendAI()" data-i18n="ai.send">Ask →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">YEM <span>//</span> Photography</div>
+  <div class="footer-copy" data-i18n="footer.copy">© 2025 Yassir El Mesbahi · Montréal, Canada</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+// ─── TRANSLATIONS ───────────────────────────────────────────────
+const T = {
+  en: {
+    'drag':'DRAG',
+    'nav.gallery':'Gallery','nav.about':'About','nav.book':'Book','nav.main':'← Main site',
+    'hero.bgword':'SIGHT',
+    'hero.title':'Through<br><em>the lens</em><br>of curiosity.',
+    'hero.desc':'From the medinas of Morocco to the streets of Europe — portraits, landscapes, street, documentary, and everything in between.',
+    'hero.cta':'Explore the gallery ↓',
+    'gallery.hint':'Scroll or drag to explore','gallery.scroll':'Scroll',
+    'genres':['All','Portrait','Landscape','Street','Documentary','Abstract'],
+    'genre.keys':['all','portrait','landscape','street','documentary','abstract'],
+    'ph1.title':'Golden Hour Portrait','ph1.meta':'Portrait · Tangier 2024',
+    'ph2.title':'Atlantic Dusk','ph2.meta':'Landscape · Cap Spartel 2024',
+    'ph3.title':'Medina Shadows','ph3.meta':'Street · Tétouan 2023',
+    'ph4.title':'Fishermen at 5am','ph4.meta':'Documentary · Tangier 2024',
+    'ph5.title':'Tile Repetition','ph5.meta':'Abstract · Marrakech 2022',
+    'ph6.title':'Rush Hour','ph6.meta':'Street · Casablanca 2023',
+    'ph7.title':'The Craftsman','ph7.meta':'Portrait · Fès 2023',
+    'ph8.title':'Saharan Edge','ph8.meta':'Landscape · Merzouga 2023',
+    'about.eyebrow':'About the photographer',
+    'about.h1':'A researcher','about.h2':'with ','about.h3':'an eye.',
+    'about.p1':"I'm Yassir — by day an ML Research Engineer, by every other hour a photographer. The same obsession with patterns, light, and meaning that draws me to machine learning pulls me through the viewfinder.",
+    'about.p2':'My work spans Morocco and Europe, mixing long documentary projects with spontaneous street photography and commissioned portrait work. Every frame has a reason to exist.',
+    'gear.body':'Primary body','gear.lenses':'Lenses','gear.post':'Post-processing','gear.based':'Based in','gear.location':'Montréal, Canada',
+    'svc1.name':'Portrait Sessions','svc1.desc':'Individual, couple, or family portraits. Outdoor locations around Tangier or studio setups. 1–3 hours, fully edited delivery.',
+    'svc2.name':'Editorial & Events','svc2.desc':'Conferences, cultural events, brand campaigns. Documentary-style coverage with an editorial eye.',
+    'svc.book':'Book a session →','svc.quote':'Request a quote →',
+    'booking.h1':"Let's make",'booking.h2':'something','booking.h3':'together.',
+    'booking.sub':'Portrait sessions, events, editorial projects, or fine art prints — reach out and we\'ll make it happen.',
+    'opt1.name':'Book a Session','opt1.sub':'Schedule time directly',
+    'opt2.name':'Request a Quote','opt2.sub':'Custom project pricing',
+    'opt3.name':'Fine Art Print','opt3.sub':'Limited edition prints',
+    'opt4.name':'General Inquiry','opt4.sub':'Questions & collaborations',
+    'form.tag':'Booking Request','form.fname':'First name','form.lname':'Last name',
+    'form.email':'Email','form.service':'Service','form.selectopt':'Select...',
+    'form.date':'Date','form.budget':'Budget','form.details':'Project details',
+    'form.send':'Send Request →','form.placeholder':'Describe your vision...',
+    'form.fn.placeholder':'Your name','form.ln.placeholder':'Last name',
+    'bud1':'< 500 MAD','bud2':'500–2,000 MAD','bud3':'2,000–5,000 MAD','bud4':'5,000+ MAD','bud5':"Let's discuss",
+    'ai.label':'AI Booking Assistant','ai.send':'Ask →',
+    'ai.placeholder':'Ask about pricing, availability...',
+    'ai.greeting':"Hi! I can help you choose the right service, understand pricing, or answer any questions about Yassir's photography work. What do you need?",
+    'footer.copy':'© 2025 Yassir El Mesbahi · Montréal, Canada',
+  },
+  fr: {
+    'drag':'GLISSER',
+    'nav.gallery':'Galerie','nav.about':'À propos','nav.book':'Réserver','nav.main':'← Site principal',
+    'hero.bgword':'LUMIÈRE',
+    'hero.title':'À travers<br><em>l\'objectif</em><br>de la curiosité.',
+    'hero.desc':'Des médinas du Maroc aux rues d\'Europe — portraits, paysages, rue, documentaire, et tout ce qui se trouve entre les deux.',
+    'hero.cta':'Explorer la galerie ↓',
+    'gallery.hint':'Défiler ou glisser pour explorer','gallery.scroll':'Défiler',
+    'genres':['Tout','Portrait','Paysage','Rue','Documentaire','Abstrait'],
+    'genre.keys':['all','portrait','landscape','street','documentary','abstract'],
+    'ph1.title':'Portrait en Heure Dorée','ph1.meta':'Portrait · Tanger 2024',
+    'ph2.title':'Crépuscule Atlantique','ph2.meta':'Paysage · Cap Spartel 2024',
+    'ph3.title':'Ombres de la Médina','ph3.meta':'Rue · Tétouan 2023',
+    'ph4.title':'Pêcheurs à 5h du matin','ph4.meta':'Documentaire · Tanger 2024',
+    'ph5.title':'Répétition de Carreaux','ph5.meta':'Abstrait · Marrakech 2022',
+    'ph6.title':'Heure de Pointe','ph6.meta':'Rue · Casablanca 2023',
+    'ph7.title':'L\'Artisan','ph7.meta':'Portrait · Fès 2023',
+    'ph8.title':'Lisière Saharienne','ph8.meta':'Paysage · Merzouga 2023',
+    'about.eyebrow':'À propos du photographe',
+    'about.h1':'Un chercheur','about.h2':'avec ','about.h3':'un regard.',
+    'about.p1':"Je suis Yassir — le jour ingénieur en recherche ML, le reste du temps photographe. La même obsession pour les patterns, la lumière et le sens qui m'attire vers le machine learning me guide à travers le viseur.",
+    'about.p2':'Mon travail couvre le Maroc et l\'Europe, mêlant longs projets documentaires, photographie de rue spontanée et commandes de portraits. Chaque image a une raison d\'exister.',
+    'gear.body':'Boîtier principal','gear.lenses':'Objectifs','gear.post':'Post-traitement','gear.based':'Basé à','gear.location':'Montréal, Canada',
+    'svc1.name':'Séances Portrait','svc1.desc':'Portraits individuels, en couple ou en famille. Lieux en extérieur autour de Tanger ou studio. Séances de 1 à 3 heures, livraison entièrement retouchée.',
+    'svc2.name':'Éditorial & Événements','svc2.desc':'Conférences, événements culturels, campagnes de marque. Couverture style documentaire avec un regard éditorial.',
+    'svc.book':'Réserver une séance →','svc.quote':'Demander un devis →',
+    'booking.h1':'Créons','booking.h2':'quelque chose','booking.h3':'ensemble.',
+    'booking.sub':'Séances portrait, événements, projets éditoriaux ou tirages d\'art — contactez-moi et nous ferons en sorte que ça se passe.',
+    'opt1.name':'Réserver une Séance','opt1.sub':'Planifier directement',
+    'opt2.name':'Demander un Devis','opt2.sub':'Tarification personnalisée',
+    'opt3.name':'Tirage d\'Art','opt3.sub':'Éditions limitées numérotées',
+    'opt4.name':'Renseignement Général','opt4.sub':'Questions & collaborations',
+    'form.tag':'Demande de Réservation','form.fname':'Prénom','form.lname':'Nom',
+    'form.email':'E-mail','form.service':'Prestation','form.selectopt':'Sélectionner...',
+    'form.date':'Date','form.budget':'Budget','form.details':'Détails du projet',
+    'form.send':'Envoyer la demande →','form.placeholder':'Décrivez votre vision...',
+    'form.fn.placeholder':'Votre prénom','form.ln.placeholder':'Votre nom',
+    'bud1':'< 500 MAD','bud2':'500–2 000 MAD','bud3':'2 000–5 000 MAD','bud4':'5 000+ MAD','bud5':'À discuter',
+    'ai.label':'Assistant IA Réservation','ai.send':'Envoyer →',
+    'ai.placeholder':'Questions sur les tarifs, disponibilités...',
+    'ai.greeting':"Bonjour ! Je peux vous aider à choisir la bonne prestation, comprendre les tarifs ou répondre à vos questions sur le travail photographique de Yassir. Comment puis-je vous aider ?",
+    'footer.copy':'© 2025 Yassir El Mesbahi · Tanger, Maroc',
+  }
+};
+
+let currentLang='en';
+const aiHistory=[];
+
+function detectLang(){
+  const s=localStorage.getItem('yem_lang');
+  if(s)return s;
+  const b=(navigator.language||'en').toLowerCase();
+  return b.startsWith('fr')?'fr':'en';
+}
+function t(k){return T[currentLang][k]||T['en'][k]||k;}
+
+function applyTranslations(){
+  document.documentElement.lang=currentLang;
+  // Regular data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(el.tagName==='OPTION'){el.textContent=t(k);return;}
+    el.textContent=t(k);
+  });
+  // Hero title (has HTML)
+  document.getElementById('hero-title').innerHTML=t('hero.title');
+  // Intro words
+  const iw={en:['Light','through','the','lens.'],fr:['La','lumière','à','travers.']};
+  const w=iw[currentLang];
+  ['intro-w1','intro-w2','intro-w3','intro-w4'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=w[i];
+  });
+  document.getElementById('intro-sub').textContent=currentLang==='fr'?'Yassir El Mesbahi · Photographie':'Yassir El Mesbahi · Photography';
+  // Cursor label
+  document.getElementById('cur-label').textContent=t('drag');
+  // Form placeholders
+  const p=[['bf1','form.fn.placeholder'],['bf2','form.ln.placeholder'],['bf6','form.placeholder']];
+  p.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.placeholder=t(k);});
+  const aip=document.getElementById('ai-input');
+  if(aip)aip.placeholder=t('ai.placeholder');
+  // Rebuild genre buttons
+  buildGenreBtns();
+  // Rebuild AI messages
+  rebuildAI();
+  // Lang buttons
+  document.getElementById('btn-en').classList.toggle('active',currentLang==='en');
+  document.getElementById('btn-fr').classList.toggle('active',currentLang==='fr');
+}
+
+function setLang(lang){
+  if(lang===currentLang)return;
+  const ov=document.getElementById('lang-overlay');
+  ov.classList.add('flash');
+  setTimeout(()=>{
+    currentLang=lang;
+    localStorage.setItem('yem_lang',lang);
+    applyTranslations();
+    ov.classList.remove('flash');
+  },250);
+}
+
+// ─── GENRE BUTTONS (rebuilt on lang change) ─────────────────────
+let activeGenre='all';
+function buildGenreBtns(){
+  const sw=document.getElementById('genre-sw');
+  sw.innerHTML='';
+  const labels=t('genres');
+  const keys=t('genre.keys');
+  labels.forEach((label,i)=>{
+    const b=document.createElement('button');
+    b.className='genre-btn'+(keys[i]===activeGenre?' active':'');
+    b.textContent=label;
+    b.onclick=()=>switchGenre(keys[i],b);
+    sw.appendChild(b);
+  });
+}
+function switchGenre(genre,btn){
+  activeGenre=genre;
+  document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.film-item').forEach(item=>{
+    const show=genre==='all'||item.dataset.genre===genre;
+    item.style.opacity=show?'1':'0.15';
+    item.style.pointerEvents=show?'auto':'none';
+  });
+}
+
+// ─── CURSOR ──────────────────────────────────────────────────────
+const cur=document.getElementById('cur'),curLbl=document.getElementById('cur-label');
+let mx=0,my=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cur.style.left=mx+'px';cur.style.top=my+'px';
+  curLbl.style.left=mx+'px';curLbl.style.top=my+'px';
+});
+
+// ─── GSAP ─────────────────────────────────────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+document.querySelectorAll('.reveal').forEach(el=>{
+  new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('in');},{threshold:.15}).observe(el);
+});
+
+// Filmstrip scroll hijack
+const items=Array.from(document.querySelectorAll('.film-item'));
+let activeIdx=2;
+const TOTAL=items.length;
+
+function buildDots(){
+  const hud=document.getElementById('hud-dots');
+  hud.innerHTML='';
+  items.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='hud-dot'+(i===activeIdx?' active':'');
+    hud.appendChild(d);
+  });
+  document.getElementById('hud-cur').textContent=activeIdx+1;
+  document.getElementById('hud-total').textContent=TOTAL;
+}
+buildDots();
+
+function setActive(idx){
+  idx=Math.max(0,Math.min(TOTAL-1,idx));
+  if(idx===activeIdx)return;
+  activeIdx=idx;
+  items.forEach((item,i)=>{
+    const dist=Math.abs(i-activeIdx);
+    item.classList.remove('active','side','far');
+    if(dist===0)item.classList.add('active');
+    else if(dist===1)item.classList.add('side');
+    else item.classList.add('far');
+  });
+  buildDots();
+}
+
+let lastProg=-1;
+ScrollTrigger.create({
+  trigger:document.getElementById('gallery-trigger'),
+  start:'top top',end:'bottom bottom',
+  pin:'#gallery-sticky',
+  onUpdate(self){
+    const idx=Math.round(self.progress*(TOTAL-1));
+    if(idx!==lastProg){lastProg=idx;setActive(idx);}
+  }
+});
+
+// Drag
+const dragZone=document.getElementById('drag-zone');
+const strip=document.getElementById('filmstrip');
+let isDragging=false,startX=0,dragDelta=0;
+dragZone.addEventListener('mouseenter',()=>cur.classList.add('drag-mode'));
+dragZone.addEventListener('mouseleave',()=>{cur.classList.remove('drag-mode');if(isDragging)endDrag();});
+dragZone.addEventListener('mousedown',e=>{isDragging=true;startX=e.clientX;dragDelta=0;});
+document.addEventListener('mousemove',e=>{
+  if(!isDragging)return;
+  dragDelta=startX-e.clientX;
+  gsap.set(strip,{x:-dragDelta*.15});
+});
+document.addEventListener('mouseup',endDrag);
+function endDrag(){
+  if(!isDragging)return;isDragging=false;
+  gsap.to(strip,{x:0,duration:.5,ease:'power3.out'});
+  if(Math.abs(dragDelta)>80)setActive(activeIdx+(dragDelta>0?1:-1));
+}
+dragZone.addEventListener('touchstart',e=>{isDragging=true;startX=e.touches[0].clientX;dragDelta=0;},{passive:true});
+dragZone.addEventListener('touchmove',e=>{
+  if(!isDragging)return;dragDelta=startX-e.touches[0].clientX;
+  gsap.set(strip,{x:-dragDelta*.15});
+},{passive:true});
+dragZone.addEventListener('touchend',endDrag);
+
+// ─── AI BOOKING ASSISTANT ─────────────────────────────────────────
+const AI_SYS={
+  en:`You are a helpful AI assistant for Yassir El Mesbahi's photography booking page.
+Yassir is a professional-level photographer based in Montréal, Canada (originally from Morocco). He shoots portraits, landscapes, street, documentary, and abstract genres. He is also an ML Research Engineer.
+INSTAGRAM: instagram.com/em_yassir
+SERVICES: Portrait Sessions (fully edited, 1-3hrs), Event Coverage (conferences, cultural events, corporate), Editorial/Commercial (custom quote), Fine Art Prints (limited edition, signed).
+CONTACT: yassir.elmesbahi@gmail.com | +1 514-346-9319
+Be warm, concise, and helpful. Always respond in English.`,
+  fr:`Vous etes un assistant IA pour la page de reservation photographique de Yassir El Mesbahi.
+Yassir est un photographe de niveau professionnel base a Montreal, Canada (originaire du Maroc). Il photographie des portraits, paysages, rue, documentaire et abstrait. Egalement Ingenieur Recherche ML.
+INSTAGRAM : instagram.com/em_yassir
+PRESTATIONS : Seances Portrait (retouches incluses, 1-3h), Couverture Evenement (conferences, evenements culturels, entreprises), Editorial/Commercial (devis personnalise), Tirages d Art (edition limitee, signes).
+CONTACT : yassir.elmesbahi@gmail.com | +1 514-346-9319
+Soyez chaleureux, concis et utile. Repondez toujours en francais.`
+};
+
+function addAIMsg(role,text){
+  const el=document.getElementById('ai-msgs');
+  const d=document.createElement('div');
+  d.className='ai-msg '+(role==='user'?'user':'ai-r');
+  d.textContent=text;el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+function rebuildAI(){
+  const el=document.getElementById('ai-msgs');el.innerHTML='';
+  addAIMsg('ai',t('ai.greeting'));
+  aiHistory.forEach(m=>addAIMsg(m.role,m.content));
+}
+function showAITyping(){
+  const el=document.getElementById('ai-msgs');
+  const d=document.createElement('div');d.className='ai-msg typing';d.id='ai-typing';
+  d.innerHTML='<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+  el.appendChild(d);el.scrollTop=el.scrollHeight;
+}
+async function sendAI(){
+  const inp=document.getElementById('ai-input');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';addAIMsg('user',txt);
+  aiHistory.push({role:'user',content:txt});
+  showAITyping();
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:AI_SYS[currentLang],messages:aiHistory.slice(-8)})
+    });
+    const data=await r.json();
+    document.getElementById('ai-typing')?.remove();
+    const reply=data.content?.[0]?.text||(currentLang==='fr'?'Une erreur est survenue.':'Something went wrong.');
+    aiHistory.push({role:'assistant',content:reply});
+    addAIMsg('ai',reply);
+  }catch(e){
+    document.getElementById('ai-typing')?.remove();
+    addAIMsg('ai',currentLang==='fr'?'Problème de connexion.':'Connection error. Try again.');
+  }
+}
+
+// ─── INTRO ──────────────────────────────────────────────────────
+setTimeout(()=>document.getElementById('intro').classList.add('out'),2200);
+
+// ─── INIT ────────────────────────────────────────────────────────
+currentLang=detectLang();
+applyTranslations();
+</script>
+</body>
+</html>
