@@ -473,7 +473,7 @@ footer{background:var(--bg);border-top:1px solid var(--border);padding:1.5rem 3r
           <span data-i18n="cta.photo">Photography</span>
           <span class="cta-arr">↗</span>
         </a>
-        <a href="https://github.com/yaemsi/cv-auto/blob/main/cv.pdf" target="_blank" rel="noopener" class="cta cta-amber">
+        <a href="javascript:void(0)" onclick="downloadCV()" class="cta cta-amber" id="cv-btn">
           <span data-i18n="cta.cv">Download CV</span>
           <span class="cta-arr">↓</span>
         </a>
@@ -817,6 +817,34 @@ async function sendChat(){
     chatHistory.push({role:'assistant',content:reply});addMsg('ai',reply);
   }catch(e){document.getElementById('typing')?.remove();addMsg('ai',lang==='fr'?'Problème de connexion.':'Connection issue.');}
 }
+// CV Download
+async function downloadCV(){
+  const btn=document.getElementById('cv-btn');
+  const label=btn.querySelector('[data-i18n="cta.cv"]');
+  const orig=label.textContent;
+  label.textContent=lang==='fr'?'Chargement...':'Loading...';
+  btn.style.opacity='.6';
+  btn.style.pointerEvents='none';
+  try{
+    const r=await fetch('https://raw.githubusercontent.com/yaemsi/cv-auto/main/cv.pdf');
+    if(!r.ok)throw new Error('fetch failed');
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='Yassir_ElMesbahi_CV.pdf';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }catch(e){
+    // fallback: open raw URL in new tab
+    window.open('https://raw.githubusercontent.com/yaemsi/cv-auto/main/cv.pdf','_blank');
+  }finally{
+    label.textContent=orig;
+    btn.style.opacity='';
+    btn.style.pointerEvents='';
+  }
+}
+
 lang=detectLang();applyTranslations();
 
 // Fit each name line to full container width
