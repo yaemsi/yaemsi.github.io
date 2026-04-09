@@ -6,6 +6,7 @@
 <title>YEM Photography</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Syne:wght@300;400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://w.behold.so/widget.js" type="module"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--bg:#070707;--text:#ede8df;--gold:#c9a96e;--dim:rgba(237,232,223,.35);--border:rgba(237,232,223,.08);--red:#d63b2b}
@@ -54,44 +55,45 @@ nav{position:fixed;top:0;left:0;right:0;z-index:600;padding:1.75rem 3rem;display
 .hero-cta{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,169,110,.3);padding-bottom:2px;transition:border-color .2s}
 .hero-cta:hover{border-color:var(--gold)}
 
-#gallery-section{position:relative}
-#gallery-trigger{height:600vh}
-#gallery-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg)}
-.filmstrip{display:flex;align-items:center;gap:16px;will-change:transform;user-select:none}
-.film-item{position:relative;flex-shrink:0;overflow:hidden;cursor:grab;transition:flex .6s cubic-bezier(.16,1,.3,1)}
-.film-item.active{flex:0 0 55vw}
-.film-item.side{flex:0 0 22vw}
-.film-item.far{flex:0 0 14vw}
-.film-placeholder{width:100%;background:linear-gradient(135deg,#111 0%,#1a1a1a 100%);border:1px solid var(--border);display:flex;align-items:flex-end;padding:1.25rem;position:relative;overflow:hidden;transition:height .6s cubic-bezier(.16,1,.3,1)}
-.film-item.active .film-placeholder{height:70vh}
-.film-item.side .film-placeholder{height:50vh}
-.film-item.far .film-placeholder{height:35vh}
-.film-placeholder::before{content:attr(data-label);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.06)}
-.film-placeholder::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.7));pointer-events:none}
-.film-info{position:absolute;bottom:0;left:0;right:0;padding:1.25rem;z-index:1;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1)}
-.film-item.active .film-info{transform:translateY(0)}
-.film-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:300;margin-bottom:.25rem}
-.film-meta{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
-.film-num{position:absolute;top:1rem;right:1rem;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;color:rgba(255,255,255,.2);z-index:2}
-.gallery-hud{position:absolute;bottom:2.5rem;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 3rem;z-index:10;pointer-events:none}
-.hud-dots{display:flex;gap:6px;align-items:center}
-.hud-dot{width:20px;height:1px;background:rgba(237,232,223,.2);transition:background .3s,width .3s}
-.hud-dot.active{background:var(--gold);width:40px}
-.hud-label{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
-.hud-count{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:rgba(237,232,223,.2)}
-.hud-count span{color:var(--text)}
-.scroll-hint{position:absolute;top:50%;right:3rem;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:.75rem;pointer-events:none}
-.scroll-arrow{width:1px;height:40px;background:rgba(237,232,223,.15);position:relative;overflow:hidden}
-.scroll-arrow::after{content:'';position:absolute;top:-100%;left:0;width:100%;height:100%;background:var(--gold);animation:scrollPulse 1.5s infinite}
-@keyframes scrollPulse{to{top:200%}}
-.scroll-text{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);writing-mode:vertical-rl}
-#drag-zone{position:absolute;inset:0;z-index:5}
-.genre-switcher{position:absolute;top:7rem;left:3rem;display:flex;flex-direction:column;gap:.5rem;z-index:10}
-.genre-btn{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(237,232,223,.25);background:none;border:none;cursor:pointer;text-align:left;padding:.3rem 0 .3rem 1.25rem;transition:color .2s;position:relative}
-.genre-btn::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:8px;height:1px;background:currentColor;transition:width .2s}
-.genre-btn.active{color:var(--gold)}
-.genre-btn.active::before{width:16px}
-.genre-btn:hover{color:var(--text)}
+/* ── BEHOLD GALLERY ── */
+.behold-wrap{
+  padding:5rem 3rem;
+  border-bottom:1px solid var(--border);
+}
+.behold-header{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:1rem;
+  margin-bottom:2.5rem;
+}
+.behold-eyebrow{
+  font-family:'DM Mono',monospace;
+  font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--gold);
+}
+.behold-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,5vw,3.5rem);
+  font-weight:300;color:var(--text);
+  line-height:.95;
+}
+.behold-ig-link{
+  font-family:'DM Mono',monospace;
+  font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--dim);text-decoration:none;
+  border-bottom:1px solid rgba(237,232,223,.15);
+  padding-bottom:2px;
+  transition:color .2s,border-color .2s;
+  white-space:nowrap;
+}
+.behold-ig-link:hover{color:var(--gold);border-color:var(--gold)}
+behold-widget{display:block;width:100%}
+@media(max-width:900px){
+  .behold-wrap{padding:3.5rem 1.5rem}
+  .behold-header{flex-direction:column;gap:.75rem}
+}
 
 #about{background:var(--bg);border-top:1px solid var(--border)}
 .about-wrap{display:grid;grid-template-columns:1fr 1fr;min-height:80vh}
@@ -194,11 +196,7 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;justify
   .about-r,.booking-l,.booking-r{padding:3rem 1.5rem}
   .f-row{grid-template-columns:1fr}
   footer{padding:1.5rem;flex-direction:column;gap:.75rem;text-align:center}
-  .genre-switcher{display:none}
   .gallery-hud{padding:0 1.5rem}
-  .film-item.active{flex:0 0 88vw}
-  .film-item.side{flex:0 0 44vw}
-  .film-item.far{flex:0 0 28vw}
   .about-text{font-size:1rem}
   .about-heading{font-size:clamp(1.8rem,5vw,3rem)}
   .booking-heading{font-size:clamp(2rem,6vw,3.5rem)}
@@ -283,32 +281,15 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;justify
 </section>
 
 <section id="gallery-section">
-  <div id="gallery-trigger">
-    <div id="gallery-sticky">
-      <div class="genre-switcher" id="genre-sw"></div>
-      <div id="drag-zone"></div>
-      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-        <div class="filmstrip" id="filmstrip">
-          <div class="film-item far" data-genre="landscape"><div class="film-placeholder" style="height:35vh"><div class="film-num">08</div><div class="film-info"><div class="film-title" data-i18n="ph8.title">Saharan Edge</div><div class="film-meta" data-i18n="ph8.meta">Landscape · Merzouga 2023</div></div></div></div>
-          <div class="film-item side" data-genre="portrait"><div class="film-placeholder" style="height:50vh"><div class="film-num">07</div><div class="film-info"><div class="film-title" data-i18n="ph7.title">The Craftsman</div><div class="film-meta" data-i18n="ph7.meta">Portrait · Fès 2023</div></div></div></div>
-          <div class="film-item active" data-genre="portrait"><div class="film-placeholder" style="height:70vh"><div class="film-num">01</div><div class="film-info"><div class="film-title" data-i18n="ph1.title">Golden Hour Portrait</div><div class="film-meta" data-i18n="ph1.meta">Portrait · Tangier 2024</div></div></div></div>
-          <div class="film-item side" data-genre="landscape"><div class="film-placeholder" style="height:50vh"><div class="film-num">02</div><div class="film-info"><div class="film-title" data-i18n="ph2.title">Atlantic Dusk</div><div class="film-meta" data-i18n="ph2.meta">Landscape · Cap Spartel 2024</div></div></div></div>
-          <div class="film-item far" data-genre="street"><div class="film-placeholder" style="height:35vh"><div class="film-num">03</div><div class="film-info"><div class="film-title" data-i18n="ph3.title">Medina Shadows</div><div class="film-meta" data-i18n="ph3.meta">Street · Tétouan 2023</div></div></div></div>
-          <div class="film-item far" data-genre="documentary"><div class="film-placeholder" style="height:35vh"><div class="film-num">04</div><div class="film-info"><div class="film-title" data-i18n="ph4.title">Fishermen at 5am</div><div class="film-meta" data-i18n="ph4.meta">Documentary · Tangier 2024</div></div></div></div>
-          <div class="film-item far" data-genre="abstract"><div class="film-placeholder" style="height:35vh"><div class="film-num">05</div><div class="film-info"><div class="film-title" data-i18n="ph5.title">Tile Repetition</div><div class="film-meta" data-i18n="ph5.meta">Abstract · Marrakech 2022</div></div></div></div>
-          <div class="film-item far" data-genre="street"><div class="film-placeholder" style="height:35vh"><div class="film-num">06</div><div class="film-info"><div class="film-title" data-i18n="ph6.title">Rush Hour</div><div class="film-meta" data-i18n="ph6.meta">Street · Casablanca 2023</div></div></div></div>
-        </div>
-      </div>
-      <div class="gallery-hud">
-        <div class="hud-dots" id="hud-dots"></div>
-        <div class="hud-label" data-i18n="gallery.hint">Scroll or drag to explore</div>
-        <div class="hud-count"><span id="hud-cur">1</span> / <span id="hud-total">8</span></div>
-      </div>
-      <div class="scroll-hint">
-        <div class="scroll-arrow"></div>
-        <div class="scroll-text" data-i18n="gallery.scroll">Scroll</div>
-      </div>
+  <div class="behold-wrap">
+    <div class="behold-header reveal">
+      <div class="behold-eyebrow" data-i18n="gallery.eyebrow">Instagram · @em_yassir</div>
+      <h2 class="behold-title" data-i18n="gallery.title">Latest Work</h2>
+      <a href="https://instagram.com/em_yassir" target="_blank" class="behold-ig-link">
+        View on Instagram ↗
+      </a>
     </div>
+    <behold-widget feed-id="temAbEybh6ZsGHBbzKbw"></behold-widget>
   </div>
 </section>
 
@@ -400,7 +381,6 @@ footer{border-top:1px solid var(--border);padding:2rem 3rem;display:flex;justify
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <script>
 // ─── TRANSLATIONS ───────────────────────────────────────────────
 const T = {
@@ -411,7 +391,8 @@ const T = {
     'hero.title':'Through<br><em>the lens</em><br>of curiosity.',
     'hero.desc':'From the medinas of Morocco to the streets of Europe — portraits, landscapes, street, documentary, and everything in between.',
     'hero.cta':'Explore the gallery ↓',
-    'gallery.hint':'Scroll or drag to explore','gallery.scroll':'Scroll',
+    'gallery.eyebrow':'Instagram · @em_yassir',
+    'gallery.title':'Latest Work',
     'genres':['All','Portrait','Landscape','Street','Documentary','Abstract'],
     'genre.keys':['all','portrait','landscape','street','documentary','abstract'],
     'ph1.title':'Golden Hour Portrait','ph1.meta':'Portrait · Tangier 2024',
@@ -454,7 +435,8 @@ const T = {
     'hero.title':'À travers<br><em>l\'objectif</em><br>de la curiosité.',
     'hero.desc':'Des médinas du Maroc aux rues d\'Europe — portraits, paysages, rue, documentaire, et tout ce qui se trouve entre les deux.',
     'hero.cta':'Explorer la galerie ↓',
-    'gallery.hint':'Défiler ou glisser pour explorer','gallery.scroll':'Défiler',
+    'gallery.eyebrow':'Instagram · @em_yassir',
+    'gallery.title':'Derniers Travaux',
     'genres':['Tout','Portrait','Paysage','Rue','Documentaire','Abstrait'],
     'genre.keys':['all','portrait','landscape','street','documentary','abstract'],
     'ph1.title':'Portrait en Heure Dorée','ph1.meta':'Portrait · Tanger 2024',
@@ -528,8 +510,6 @@ function applyTranslations(){
   p.forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.placeholder=t(k);});
   const aip=document.getElementById('ai-input');
   if(aip)aip.placeholder=t('ai.placeholder');
-  // Rebuild genre buttons
-  buildGenreBtns();
   // Rebuild AI messages
   rebuildAI();
   // Lang buttons
@@ -549,32 +529,6 @@ function setLang(lang){
   },250);
 }
 
-// ─── GENRE BUTTONS (rebuilt on lang change) ─────────────────────
-let activeGenre='all';
-function buildGenreBtns(){
-  const sw=document.getElementById('genre-sw');
-  sw.innerHTML='';
-  const labels=t('genres');
-  const keys=t('genre.keys');
-  labels.forEach((label,i)=>{
-    const b=document.createElement('button');
-    b.className='genre-btn'+(keys[i]===activeGenre?' active':'');
-    b.textContent=label;
-    b.onclick=()=>switchGenre(keys[i],b);
-    sw.appendChild(b);
-  });
-}
-function switchGenre(genre,btn){
-  activeGenre=genre;
-  document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.film-item').forEach(item=>{
-    const show=genre==='all'||item.dataset.genre===genre;
-    item.style.opacity=show?'1':'0.15';
-    item.style.pointerEvents=show?'auto':'none';
-  });
-}
-
 // ─── CURSOR ──────────────────────────────────────────────────────
 const cur=document.getElementById('cur'),curLbl=document.getElementById('cur-label');
 let mx=0,my=0;
@@ -584,79 +538,10 @@ document.addEventListener('mousemove',e=>{
   curLbl.style.left=mx+'px';curLbl.style.top=my+'px';
 });
 
-// ─── GSAP ─────────────────────────────────────────────────────────
-gsap.registerPlugin(ScrollTrigger);
+// ─── REVEALS ─────────────────────────────────────────────────────
 document.querySelectorAll('.reveal').forEach(el=>{
   new IntersectionObserver(([e])=>{if(e.isIntersecting)el.classList.add('in');},{threshold:.15}).observe(el);
 });
-
-// Filmstrip scroll hijack
-const items=Array.from(document.querySelectorAll('.film-item'));
-let activeIdx=2;
-const TOTAL=items.length;
-
-function buildDots(){
-  const hud=document.getElementById('hud-dots');
-  hud.innerHTML='';
-  items.forEach((_,i)=>{
-    const d=document.createElement('div');
-    d.className='hud-dot'+(i===activeIdx?' active':'');
-    hud.appendChild(d);
-  });
-  document.getElementById('hud-cur').textContent=activeIdx+1;
-  document.getElementById('hud-total').textContent=TOTAL;
-}
-buildDots();
-
-function setActive(idx){
-  idx=Math.max(0,Math.min(TOTAL-1,idx));
-  if(idx===activeIdx)return;
-  activeIdx=idx;
-  items.forEach((item,i)=>{
-    const dist=Math.abs(i-activeIdx);
-    item.classList.remove('active','side','far');
-    if(dist===0)item.classList.add('active');
-    else if(dist===1)item.classList.add('side');
-    else item.classList.add('far');
-  });
-  buildDots();
-}
-
-let lastProg=-1;
-ScrollTrigger.create({
-  trigger:document.getElementById('gallery-trigger'),
-  start:'top top',end:'bottom bottom',
-  pin:'#gallery-sticky',
-  onUpdate(self){
-    const idx=Math.round(self.progress*(TOTAL-1));
-    if(idx!==lastProg){lastProg=idx;setActive(idx);}
-  }
-});
-
-// Drag
-const dragZone=document.getElementById('drag-zone');
-const strip=document.getElementById('filmstrip');
-let isDragging=false,startX=0,dragDelta=0;
-dragZone.addEventListener('mouseenter',()=>cur.classList.add('drag-mode'));
-dragZone.addEventListener('mouseleave',()=>{cur.classList.remove('drag-mode');if(isDragging)endDrag();});
-dragZone.addEventListener('mousedown',e=>{isDragging=true;startX=e.clientX;dragDelta=0;});
-document.addEventListener('mousemove',e=>{
-  if(!isDragging)return;
-  dragDelta=startX-e.clientX;
-  gsap.set(strip,{x:-dragDelta*.15});
-});
-document.addEventListener('mouseup',endDrag);
-function endDrag(){
-  if(!isDragging)return;isDragging=false;
-  gsap.to(strip,{x:0,duration:.5,ease:'power3.out'});
-  if(Math.abs(dragDelta)>80)setActive(activeIdx+(dragDelta>0?1:-1));
-}
-dragZone.addEventListener('touchstart',e=>{isDragging=true;startX=e.touches[0].clientX;dragDelta=0;},{passive:true});
-dragZone.addEventListener('touchmove',e=>{
-  if(!isDragging)return;dragDelta=startX-e.touches[0].clientX;
-  gsap.set(strip,{x:-dragDelta*.15});
-},{passive:true});
-dragZone.addEventListener('touchend',endDrag);
 
 // ─── AI BOOKING ASSISTANT ─────────────────────────────────────────
 const AI_SYS={
